@@ -1,0 +1,283 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Analytics - Mini Social Network{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 mx-auto">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-chart-bar"></i> Analytics Dashboard</h2>
+            <small class="text-muted">Real-time platform statistics</small>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center bg-primary text-white">
+                    <div class="card-body">
+                        <i class="fas fa-file-alt fa-2x mb-2"></i>
+                        <h3>{{ total_posts }}</h3>
+                        <p class="mb-0">Total Posts</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-success text-white">
+                    <div class="card-body">
+                        <i class="fas fa-heart fa-2x mb-2"></i>
+                        <h3>{{ total_likes }}</h3>
+                        <p class="mb-0">Total Likes</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-info text-white">
+                    <div class="card-body">
+                        <i class="fas fa-comments fa-2x mb-2"></i>
+                        <h3>{{ total_comments }}</h3>
+                        <p class="mb-0">Total Comments</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-warning text-white">
+                    <div class="card-body">
+                        <i class="fas fa-users fa-2x mb-2"></i>
+                        <h3>{{ total_users }}</h3>
+                        <p class="mb-0">Total Users</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top 3 Most Liked Posts -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-trophy"></i> Top 3 Most Liked Posts</h5>
+            </div>
+            <div class="card-body">
+                {% if top_posts %}
+                    {% for post in top_posts %}
+                    <div class="d-flex align-items-start mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
+                        <div class="badge bg-primary rounded-pill me-3 mt-1">{{ forloop.counter }}</div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">
+                                        <a href="{% url 'profile' post.author.username %}" class="text-decoration-none">
+                                            <i class="fas fa-user-circle"></i> {{ post.author.username }}
+                                        </a>
+                                    </h6>
+                                    <small class="text-muted">{{ post.created_at|date:"M d, Y" }}</small>
+                                </div>
+                                <span class="badge bg-danger">
+                                    <i class="fas fa-heart"></i> {{ post.likes_count }}
+                                </span>
+                            </div>
+                            <p class="mb-1 mt-2">{{ post.content|truncatewords:20 }}</p>
+                            {% if post.image %}
+                            <img src="{{ post.image.url }}" class="img-thumbnail mt-2" style="max-height: 100px;">
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-heart fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No posts with likes yet</h5>
+                        <p class="text-muted">Start liking posts to see the top performers here!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="row">
+            <!-- Top Users Chart -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-bar"></i> Top 5 Users by Posts</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        {% if chart_url %}
+                            <img src="data:image/png;base64,{{ chart_url }}" class="img-fluid" alt="Top Users Chart">
+                        {% else %}
+                            <div class="py-5">
+                                <i class="fas fa-chart-bar fa-3x text-muted mb-3"></i>
+                                <h6 class="text-muted">No data available</h6>
+                                <p class="text-muted">Chart will appear when users start posting.</p>
+                            </div>
+                        {% endif %}
+</div>
+</div>
+
+            <!-- Activity Overview -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-activity"></i> Platform Activity</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Posts</span>
+                                <span>{{ total_posts }}</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-primary" style="width: {% if total_posts > 0 %}100{% else %}0{% endif %}%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Likes</span>
+                                <span>{{ total_likes }}</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-success" style="width: {% if total_likes > 0 and total_posts > 0 %}{% widthratio total_likes total_posts 20 %}{% else %}0{% endif %}%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Comments</span>
+                                <span>{{ total_comments }}</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-info" style="width: {% if total_comments > 0 and total_posts > 0 %}{% widthratio total_comments total_posts 15 %}{% else %}0{% endif %}%"></div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <h6>Engagement Metrics</h6>
+                            <ul class="list-unstyled">
+                                <li>
+                                    <strong>Avg Likes per Post:</strong> 
+                                    {{ avg_likes_per_post|floatformat:1 }}
+                                </li>
+                                <li>
+                                    <strong>Avg Comments per Post:</strong> 
+                                    {{ avg_comments_per_post|floatformat:1 }}
+                                </li>
+                                <li>
+                                    <strong>Avg Posts per User:</strong> 
+                                    {{ avg_posts_per_user|floatformat:1 }}
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Posts by Day (JSON + Chart.js) -->
+                <div class="card mt-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-calendar-day"></i> Posts by Day</h5>
+                        <small class="text-muted">Data from JSON endpoint</small>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="postsByDayChart" height="150"></canvas>
+                        <div class="mt-3">
+                            <small class="text-muted">Likes stats — Avg: <span id="likesAvg">0.00</span>, Std: <span id="likesStd">0.00</span></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-clock"></i> Recent Activity</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_posts %}
+                    <div class="row">
+                        {% for post in recent_posts %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <a href="{% url 'profile' post.author.username %}" class="text-decoration-none">
+                                            {{ post.author.username }}
+                                        </a>
+                                    </h6>
+                                    <p class="card-text">{{ post.content|truncatewords:10 }}</p>
+                                    <small class="text-muted">
+                                        <i class="fas fa-heart"></i> {{ post.like_count }}
+                                        <i class="fas fa-comment ms-2"></i> {{ post.comment_count }}
+                                    </small>
+                                </div>
+                                <div class="card-footer">
+                                    <small class="text-muted">{{ post.created_at|timesince }} ago</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-clock fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No recent activity</h5>
+                        <p class="text-muted">Activity will appear here as users interact with the platform.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Refresh Button -->
+        <div class="text-center mt-4">
+            <a href="{% url 'analytics' %}" class="btn btn-outline-primary">
+                <i class="fas fa-sync-alt"></i> Refresh Data
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js and JSON-driven chart -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const url = "{% url 'analytics_data' %}";
+    fetch(url)
+      .then(res => res.json())
+      .then(payload => {
+        const labels = (payload.posts_by_day && payload.posts_by_day.labels) || [];
+        const data = (payload.posts_by_day && payload.posts_by_day.data) || [];
+        const canvas = document.getElementById('postsByDayChart');
+        if (canvas && labels.length) {
+          const ctx = canvas.getContext('2d');
+          new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: labels,
+              datasets: [{
+                label: 'Posts',
+                data: data,
+                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                tension: 0.3,
+                fill: true
+              }]
+            },
+            options: {
+              responsive: true,
+              scales: { y: { beginAtZero: true } }
+            }
+          });
+        }
+
+        // Update likes stats
+        const avgEl = document.getElementById('likesAvg');
+        const stdEl = document.getElementById('likesStd');
+        if (avgEl && payload.likes_stats && typeof payload.likes_stats.avg === 'number') {
+          avgEl.textContent = payload.likes_stats.avg.toFixed(2);
+        }
+        if (stdEl && payload.likes_stats && typeof payload.likes_stats.std === 'number') {
+          stdEl.textContent = payload.likes_stats.std.toFixed(2);
+        }
+      })
+      .catch(err => console.error('Analytics data fetch failed:', err));
+});
+</script>
+{% endblock %}

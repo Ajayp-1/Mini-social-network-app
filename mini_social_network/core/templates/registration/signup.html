@@ -1,0 +1,153 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Sign Up - Mini Social Network{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="card">
+            <div class="card-header text-center">
+                <h3><i class="fas fa-user-plus"></i> Join Mini Social Network</h3>
+                <p class="text-muted mb-0">Create your account to start sharing and connecting</p>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="id_username" class="form-label">
+                            <i class="fas fa-user"></i> Username
+                        </label>
+                        <input type="text" name="username" id="id_username" class="form-control" 
+                               value="{{ form.username.value|default:'' }}" required>
+                        {% if form.username.errors %}
+                            <div class="text-danger">
+                                {% for error in form.username.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="form-text text-muted">
+                            150 characters or fewer. Letters, digits and @/./+/-/_ only.
+                        </small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_email" class="form-label">
+                            <i class="fas fa-envelope"></i> Email Address
+                        </label>
+                        <input type="email" name="email" id="id_email" class="form-control" 
+                               value="{{ form.email.value|default:'' }}">
+                        {% if form.email.errors %}
+                            <div class="text-danger">
+                                {% for error in form.email.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="form-text text-muted">Optional but recommended for account recovery.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_password1" class="form-label">
+                            <i class="fas fa-lock"></i> Password
+                        </label>
+                        <input type="password" name="password1" id="id_password1" class="form-control" required>
+                        {% if form.password1.errors %}
+                            <div class="text-danger">
+                                {% for error in form.password1.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_password2" class="form-label">
+                            <i class="fas fa-lock"></i> Confirm Password
+                        </label>
+                        <input type="password" name="password2" id="id_password2" class="form-control" required>
+                        {% if form.password2.errors %}
+                            <div class="text-danger">
+                                {% for error in form.password2.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-user-plus"></i> Create Account
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center">
+                <p class="mb-0">
+                    Already have an account? 
+                    <a href="{% url 'login' %}" class="text-decoration-none">
+                        <i class="fas fa-sign-in-alt"></i> Sign In
+                    </a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Features Preview -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6><i class="fas fa-star"></i> What you can do</h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <i class="fas fa-edit fa-2x text-primary mb-2"></i>
+                        <h6>Share Posts</h6>
+                        <small class="text-muted">Create and share your thoughts with images</small>
+                    </div>
+                    <div class="col-md-4">
+                        <i class="fas fa-heart fa-2x text-danger mb-2"></i>
+                        <h6>Like & Comment</h6>
+                        <small class="text-muted">Engage with the community</small>
+                    </div>
+                    <div class="col-md-4">
+                        <i class="fas fa-chart-bar fa-2x text-success mb-2"></i>
+                        <h6>View Analytics</h6>
+                        <small class="text-muted">See platform statistics and trends</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const password1 = document.getElementById('id_password1');
+    const password2 = document.getElementById('id_password2');
+    
+    function validatePasswords() {
+        if (password1.value && password2.value) {
+            if (password1.value === password2.value) {
+                password2.classList.remove('is-invalid');
+                password2.classList.add('is-valid');
+            } else {
+                password2.classList.remove('is-valid');
+                password2.classList.add('is-invalid');
+            }
+        }
+    }
+    
+    password1.addEventListener('input', validatePasswords);
+    password2.addEventListener('input', validatePasswords);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,168 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Home Feed - Mini Social Network{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-stream"></i> Latest Posts</h2>
+            {% if user.is_authenticated %}
+            <a href="{% url 'create_post' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create Post
+            </a>
+            {% endif %}
+        </div>
+
+        {% if not user.is_authenticated %}
+        <div class="alert alert-info">
+            <h5><i class="fas fa-info-circle"></i> Welcome to Mini Social Network!</h5>
+            <p>Please <a href="{% url 'login' %}">login</a> or <a href="{% url 'signup' %}">sign up</a> to create posts and interact with the community.</p>
+        </div>
+        {% endif %}
+
+        {% for post in posts %}
+        <div class="post-card">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                    <h5 class="mb-1">
+                        <a href="{% url 'profile' post.author.username %}" class="text-decoration-none">
+                            <i class="fas fa-user-circle"></i> {{ post.author.username }}
+                        </a>
+                    </h5>
+                    <small class="post-meta">
+                        <i class="fas fa-clock"></i> {{ post.created_at|timesince }} ago
+                    </small>
+                </div>
+                {% if user == post.author %}
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'edit_post' post.pk %}">
+                            <i class="fas fa-edit"></i> Edit
+                        </a></li>
+                        <li><a class="dropdown-item text-danger" href="{% url 'delete_post' post.pk %}">
+                            <i class="fas fa-trash"></i> Delete
+                        </a></li>
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="mb-3">
+                <p>{{ post.content|linebreaks }}</p>
+                {% if post.image %}
+                <img src="{{ post.image.url }}" class="img-fluid rounded" alt="Post image" style="max-height: 400px;">
+                {% endif %}
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div>
+                    {% if user.is_authenticated %}
+                    <form method="post" action="{% url 'toggle_like' post.pk %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="like-btn {% if post.id in user_likes %}liked{% endif %}">
+                            <i class="fas fa-heart"></i> {{ post.like_count }}
+                        </button>
+                    </form>
+                    {% else %}
+                    <span class="text-muted">
+                        <i class="fas fa-heart"></i> {{ post.like_count }}
+                    </span>
+                    {% endif %}
+                    <span class="text-muted ms-3">
+                        <i class="fas fa-comment"></i> {{ post.comment_count }} comments
+                    </span>
+                </div>
+                <small class="text-muted">
+                    {% if post.updated_at != post.created_at %}
+                        <i class="fas fa-edit"></i> Edited {{ post.updated_at|timesince }} ago
+                    {% endif %}
+                </small>
+            </div>
+
+            <!-- Comments Section -->
+            <div class="comment-section">
+                <h6><i class="fas fa-comments"></i> Comments</h6>
+                
+                {% if user.is_authenticated %}
+                <form method="post" action="{% url 'add_comment' post.pk %}" class="mb-3">
+                    {% csrf_token %}
+                    <div class="input-group">
+                        <input type="text" name="content" class="form-control" placeholder="Add a comment..." required>
+                        <button type="submit" class="btn btn-outline-primary">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </form>
+                {% endif %}
+
+                {% for comment in post.comments.all|slice:":5" %}
+                <div class="mb-2 p-2 bg-white rounded">
+                    <strong>
+                        <a href="{% url 'profile' comment.author.username %}" class="text-decoration-none">
+                            {{ comment.author.username }}
+                        </a>
+                    </strong>
+                    <small class="text-muted">{{ comment.created_at|timesince }} ago</small>
+                    <p class="mb-0 mt-1">{{ comment.content }}</p>
+                </div>
+                {% empty %}
+                <p class="text-muted mb-0">No comments yet. Be the first to comment!</p>
+                {% endfor %}
+
+                {% if post.comments.count > 5 %}
+                <small class="text-muted">
+                    <i class="fas fa-ellipsis-h"></i> {{ post.comments.count|add:"-5" }} more comments
+                </small>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-5">
+            <i class="fas fa-stream fa-3x text-muted mb-3"></i>
+            <h4 class="text-muted">No posts yet</h4>
+            <p class="text-muted">Be the first to share something with the community!</p>
+            {% if user.is_authenticated %}
+            <a href="{% url 'create_post' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create Your First Post
+            </a>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <nav aria-label="Posts pagination">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1">First</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                </li>
+                {% endif %}
+
+                <li class="page-item active">
+                    <span class="page-link">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
+                </li>
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

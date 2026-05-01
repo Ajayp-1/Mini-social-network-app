@@ -1,0 +1,107 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Edit Post - Mini Social Network{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-edit"></i> Edit Post</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="content" class="form-label">Content</label>
+                        <textarea name="content" id="content" class="form-control" rows="4" required>{{ post.content }}</textarea>
+                        {% if form.content.errors %}
+                            <div class="text-danger">
+                                {% for error in form.content.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {% if post.image %}
+                    <div class="mb-3">
+                        <label class="form-label">Current Image</label>
+                        <div class="mb-2">
+                            <img src="{{ post.image.url }}" class="img-thumbnail" style="max-height: 200px;">
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" name="remove_image" id="remove_image" class="form-check-input">
+                            <label for="remove_image" class="form-check-label text-danger">
+                                <i class="fas fa-trash"></i> Remove current image
+                            </label>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label for="image" class="form-label">
+                            <i class="fas fa-image"></i> 
+                            {% if post.image %}Replace Image{% else %}Add Image{% endif %} (Optional)
+                        </label>
+                        <input type="file" name="image" id="image" class="form-control" accept="image/*">
+                        <small class="form-text text-muted">
+                            Supported formats: JPG, PNG, GIF. Max size: 5MB
+                        </small>
+                        {% if form.image.errors %}
+                            <div class="text-danger">
+                                {% for error in form.image.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'feed' %}" class="btn btn-secondary me-md-2">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Update Post
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Original Post Info -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6><i class="fas fa-info-circle"></i> Post Information</h6>
+            </div>
+            <div class="card-body">
+                <p><strong>Created:</strong> {{ post.created_at|date:"F d, Y \a\t g:i A" }}</p>
+                {% if post.updated_at != post.created_at %}
+                <p><strong>Last Updated:</strong> {{ post.updated_at|date:"F d, Y \a\t g:i A" }}</p>
+                {% endif %}
+                <p><strong>Likes:</strong> {{ post.like_count }}</p>
+                <p><strong>Comments:</strong> {{ post.comment_count }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const removeImageCheckbox = document.getElementById('remove_image');
+    const imageInput = document.getElementById('image');
+    
+    if (removeImageCheckbox) {
+        removeImageCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                imageInput.value = '';
+                imageInput.disabled = true;
+            } else {
+                imageInput.disabled = false;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

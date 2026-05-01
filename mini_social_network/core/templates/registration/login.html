@@ -1,0 +1,109 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Login - Mini Social Network{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-5 mx-auto">
+        <div class="card">
+            <div class="card-header text-center">
+                <h3><i class="fas fa-sign-in-alt"></i> Welcome Back</h3>
+                <p class="text-muted mb-0">Sign in to your account</p>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="id_username" class="form-label">
+                            <i class="fas fa-user"></i> Username
+                        </label>
+                        <input type="text" name="username" id="id_username" class="form-control" 
+                               value="{{ form.username.value|default:'' }}" required autofocus>
+                        {% if form.username.errors %}
+                            <div class="text-danger">
+                                {% for error in form.username.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_password" class="form-label">
+                            <i class="fas fa-lock"></i> Password
+                        </label>
+                        <input type="password" name="password" id="id_password" class="form-control" required>
+                        {% if form.password.errors %}
+                            <div class="text-danger">
+                                {% for error in form.password.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-sign-in-alt"></i> Sign In
+                        </button>
+                    </div>
+
+                    <input type="hidden" name="next" value="{{ next }}">
+                </form>
+            </div>
+            <div class="card-footer text-center">
+                <p class="mb-0">
+                    Don't have an account? 
+                    <a href="{% url 'signup' %}" class="text-decoration-none">
+                        <i class="fas fa-user-plus"></i> Sign Up
+                    </a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Demo Account Info -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6><i class="fas fa-info-circle"></i> Demo Information</h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-2"><strong>New to the platform?</strong></p>
+                <ul class="list-unstyled mb-0">
+                    <li><i class="fas fa-check text-success"></i> Create an account to get started</li>
+                    <li><i class="fas fa-check text-success"></i> Share posts with text and images</li>
+                    <li><i class="fas fa-check text-success"></i> Like and comment on posts</li>
+                    <li><i class="fas fa-check text-success"></i> View your profile and analytics</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-focus on username field
+    const usernameField = document.getElementById('id_username');
+    if (usernameField && !usernameField.value) {
+        usernameField.focus();
+    }
+    
+    // Handle form submission
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
+        submitBtn.disabled = true;
+    });
+});
+</script>
+{% endblock %}
